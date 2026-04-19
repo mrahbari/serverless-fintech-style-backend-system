@@ -1,0 +1,7 @@
+com/example/wallet/handler/CreateAccountHandlerTest.class
+com/example/wallet/handler/ListAccountsHandlerTest.class
+com/example/wallet/TransferFlowIntegrationTest.class
+com/example/wallet/handler/TransferHandlerTest.class
+com/example/wallet/repository/AccountRepositoryPageTest.class
+com/example/wallet/handler/DepositHandlerTest.class
+com/example/wallet/handler/GetAccountHandlerTest.class

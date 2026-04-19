@@ -1,0 +1,56 @@
+{
+  "groups": [
+    {
+      "name": "wallet.aws",
+      "type": "com.example.wallet.config.WalletAwsProperties",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "wallet.aws.accounts-table",
+      "type": "java.lang.String",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": "wallet-accounts"
+    },
+    {
+      "name": "wallet.aws.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Use real AWS SDK clients and DynamoDB\/EventBridge.",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "wallet.aws.endpoint-override",
+      "type": "java.lang.String",
+      "description": "Optional base endpoint (e.g. http:\/\/localhost:4566 for LocalStack).",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties"
+    },
+    {
+      "name": "wallet.aws.event-bus-name",
+      "type": "java.lang.String",
+      "description": "Default event bus name in the account (often {@code default}).",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": "default"
+    },
+    {
+      "name": "wallet.aws.event-source",
+      "type": "java.lang.String",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": "wallet.wallet"
+    },
+    {
+      "name": "wallet.aws.idempotency-table",
+      "type": "java.lang.String",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": "wallet-transfer-idempotency"
+    },
+    {
+      "name": "wallet.aws.region",
+      "type": "java.lang.String",
+      "sourceType": "com.example.wallet.config.WalletAwsProperties",
+      "defaultValue": "eu-west-1"
+    }
+  ],
+  "hints": []
+}

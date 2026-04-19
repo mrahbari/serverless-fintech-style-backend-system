@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Wallet API — Java 21 Lambda, HTTP API, DynamoDB tables, EventBridge PutEvents
+
+Globals:
+  Function:
+    Timeout: 29
+    MemorySize: 512
+    Runtime: java21
+    Architectures:
+      - x86_64
+
+Resources:
+  AccountsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: accountId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: accountId
+          KeyType: HASH
+
+  IdempotencyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: transactionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: transactionId
+          KeyType: HASH
+
+  WalletApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: wallet-lambda/target/wallet-lambda-1.0.0-SNAPSHOT.jar
+      Handler: com.example.wallet.lambda.WalletApiLambdaHandler::handleRequest
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AccountsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref IdempotencyTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: '*'
+      Environment:
+        Variables:
+          ACCOUNTS_TABLE: !Ref AccountsTable
+          IDEMPOTENCY_TABLE: !Ref IdempotencyTable
+          EVENT_BUS_NAME: default
+          EVENT_SOURCE: wallet.wallet
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  HttpApiUrl:
+    Description: Base URL for the wallet HTTP API (paths /accounts, /deposit, /transfer)
+    Value: !GetAtt ServerlessHttpApi.ApiEndpoint
