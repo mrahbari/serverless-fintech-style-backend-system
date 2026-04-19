@@ -62,28 +62,35 @@ public class EventBridgeEventPublisher implements EventPublisher {
     }
 
     private static Map<String, Object> toDetailMap(DomainEvent event) {
-        if (event instanceof AccountCreatedEvent e) {
+        if (event instanceof AccountCreatedEvent(
+                String id, java.math.BigDecimal initialBalance, java.time.Instant occurred
+        )) {
             return Map.of(
-                    "accountId", e.accountId(),
-                    "initialBalance", e.initialBalance(),
-                    "occurredAt", e.occurredAt().toString());
+                    "accountId", id,
+                    "initialBalance", initialBalance,
+                    "occurredAt", occurred.toString());
         }
-        if (event instanceof DepositCompletedEvent e) {
+        if (event instanceof DepositCompletedEvent(
+                String accountId, java.math.BigDecimal amount1, java.math.BigDecimal newBalance, java.time.Instant at
+        )) {
             return Map.of(
-                    "accountId", e.accountId(),
-                    "amount", e.amount(),
-                    "newBalance", e.newBalance(),
-                    "occurredAt", e.occurredAt().toString());
+                    "accountId", accountId,
+                    "amount", amount1,
+                    "newBalance", newBalance,
+                    "occurredAt", at.toString());
         }
-        if (event instanceof TransferCompletedEvent e) {
+        if (event instanceof TransferCompletedEvent(
+                String transactionId, String fromAccountId, String toAccountId, java.math.BigDecimal amount,
+                java.math.BigDecimal fromBalanceAfter, java.math.BigDecimal toBalanceAfter, java.time.Instant occurredAt
+        )) {
             return Map.of(
-                    "transactionId", e.transactionId(),
-                    "fromAccountId", e.fromAccountId(),
-                    "toAccountId", e.toAccountId(),
-                    "amount", e.amount(),
-                    "fromBalanceAfter", e.fromBalanceAfter(),
-                    "toBalanceAfter", e.toBalanceAfter(),
-                    "occurredAt", e.occurredAt().toString());
+                    "transactionId", transactionId,
+                    "fromAccountId", fromAccountId,
+                    "toAccountId", toAccountId,
+                    "amount", amount,
+                    "fromBalanceAfter", fromBalanceAfter,
+                    "toBalanceAfter", toBalanceAfter,
+                    "occurredAt", occurredAt.toString());
         }
         throw new IllegalArgumentException("Unknown event: " + event);
     }

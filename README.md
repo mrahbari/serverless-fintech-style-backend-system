@@ -212,6 +212,7 @@ Primary file: **`serverless-wallet-app/src/main/resources/application.yml`**
 | Document | Purpose |
 |----------|---------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, trade-offs, scaling |
+| [docs/LAMBDA-GUIDE-FA.md](docs/LAMBDA-GUIDE-FA.md) | Beginner-friendly Lambda & Stateless guide (Persian) |
 | [docs/ENGINEERING_GUIDELINES.md](docs/ENGINEERING_GUIDELINES.md) | Standards, testing, observability, failures |
 | [docs/README-HOW-IT-WORKS.md](docs/README-HOW-IT-WORKS.md) | Module-by-module behavior |
 | [docs/IMPLEMENTATION-DETAILS.md](docs/IMPLEMENTATION-DETAILS.md) | Package and class index |

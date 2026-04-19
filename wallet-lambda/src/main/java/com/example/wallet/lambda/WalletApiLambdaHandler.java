@@ -54,7 +54,9 @@ public class WalletApiLambdaHandler implements RequestHandler<APIGatewayProxyReq
                 .map(m -> m.get("X-Correlation-Id"))
                 .or(() -> Optional.ofNullable(input.getHeaders()).map(m -> m.get("x-correlation-id")))
                 .orElse(context.getAwsRequestId());
+
         log.info("lambda_request method={} path={} correlationId={}", method, path, correlationId);
+
         try {
             return route(h, method, path, input);
         } catch (AccountNotFoundException e) {
@@ -69,48 +71,70 @@ public class WalletApiLambdaHandler implements RequestHandler<APIGatewayProxyReq
 
     private static APIGatewayProxyResponseEvent route(
             Holder h, String method, String path, APIGatewayProxyRequestEvent input) {
-        if ("GET".equals(method) && "accounts".equals(path)) {
-            Integer limit = queryInt(input, "limit");
-            String cursor = query(input, "cursor");
-            return json(200, h.wallet.listAccounts(limit, cursor), h.mapper);
+
+        return switch (method) {
+            case "GET" -> switch (path) {
+                case "accounts" -> handleListAccounts(h, input);
+                case String p when p.startsWith("accounts/") -> handleGetAccount(h, p);
+                default -> notFound(method, path, h.mapper);
+            };
+            case "POST" -> switch (path) {
+                case "accounts" -> handleCreateAccount(h, input);
+                case "deposit" -> handleDeposit(h, input);
+                case "transfer" -> handleTransfer(h, input);
+                default -> notFound(method, path, h.mapper);
+            };
+            default -> notFound(method, path, h.mapper);
+        };
+    }
+
+    private static APIGatewayProxyResponseEvent handleListAccounts(Holder h, APIGatewayProxyRequestEvent input) {
+        Integer limit = queryInt(input, "limit");
+        String cursor = query(input, "cursor");
+        return json(200, h.wallet.listAccounts(limit, cursor), h.mapper);
+    }
+
+    private static APIGatewayProxyResponseEvent handleGetAccount(Holder h, String path) {
+        String id = path.substring("accounts/".length());
+        return json(200, h.wallet.getAccount(id), h.mapper);
+    }
+
+    private static APIGatewayProxyResponseEvent handleCreateAccount(Holder h, APIGatewayProxyRequestEvent input) {
+        JsonNode body = readBody(h.mapper, input.getBody());
+        BigDecimal initial = body != null && body.hasNonNull("initialBalance")
+                ? new BigDecimal(body.get("initialBalance").asText())
+                : null;
+        return json(201, h.wallet.createAccount(initial), h.mapper);
+    }
+
+    private static APIGatewayProxyResponseEvent handleDeposit(Holder h, APIGatewayProxyRequestEvent input) {
+        JsonNode body = readBody(h.mapper, input.getBody());
+        if (body == null || !body.hasNonNull("accountId") || !body.hasNonNull("amount")) {
+            throw new IllegalArgumentException("accountId and amount required");
         }
-        if ("GET".equals(method) && path.startsWith("accounts/")) {
-            String id = path.substring("accounts/".length());
-            return json(200, h.wallet.getAccount(id), h.mapper);
+        return json(200, h.wallet.deposit(
+                body.get("accountId").asText(),
+                new BigDecimal(body.get("amount").asText())), h.mapper);
+    }
+
+    private static APIGatewayProxyResponseEvent handleTransfer(Holder h, APIGatewayProxyRequestEvent input) {
+        JsonNode body = readBody(h.mapper, input.getBody());
+        if (body == null
+                || !body.hasNonNull("transactionId")
+                || !body.hasNonNull("fromAccountId")
+                || !body.hasNonNull("toAccountId")
+                || !body.hasNonNull("amount")) {
+            throw new IllegalArgumentException("transactionId, fromAccountId, toAccountId, amount required");
         }
-        if ("POST".equals(method) && "accounts".equals(path)) {
-            JsonNode body = readBody(h.mapper, input.getBody());
-            BigDecimal initial = body != null && body.hasNonNull("initialBalance")
-                    ? new BigDecimal(body.get("initialBalance").asText())
-                    : null;
-            return json(201, h.wallet.createAccount(initial), h.mapper);
-        }
-        if ("POST".equals(method) && "deposit".equals(path)) {
-            JsonNode body = readBody(h.mapper, input.getBody());
-            if (body == null || !body.hasNonNull("accountId") || !body.hasNonNull("amount")) {
-                throw new IllegalArgumentException("accountId and amount required");
-            }
-            return json(200, h.wallet.deposit(body.get("accountId").asText(), new BigDecimal(body.get("amount").asText())), h.mapper);
-        }
-        if ("POST".equals(method) && "transfer".equals(path)) {
-            JsonNode body = readBody(h.mapper, input.getBody());
-            if (body == null
-                    || !body.hasNonNull("transactionId")
-                    || !body.hasNonNull("fromAccountId")
-                    || !body.hasNonNull("toAccountId")
-                    || !body.hasNonNull("amount")) {
-                throw new IllegalArgumentException("transactionId, fromAccountId, toAccountId, amount required");
-            }
-            return json(
-                    200,
-                    h.wallet.transfer(
-                            body.get("transactionId").asText(),
-                            body.get("fromAccountId").asText(),
-                            body.get("toAccountId").asText(),
-                            new BigDecimal(body.get("amount").asText())),
-                    h.mapper);
-        }
-        return json(404, Map.of("error", "Not found: " + method + " " + path), h.mapper);
+        return json(200, h.wallet.transfer(
+                body.get("transactionId").asText(),
+                body.get("fromAccountId").asText(),
+                body.get("toAccountId").asText(),
+                new BigDecimal(body.get("amount").asText())), h.mapper);
+    }
+
+    private static APIGatewayProxyResponseEvent notFound(String method, String path, ObjectMapper mapper) {
+        return json(404, Map.of("error", "Not found: " + method + " " + path), mapper);
     }
 
     private static JsonNode readBody(ObjectMapper mapper, String raw) {

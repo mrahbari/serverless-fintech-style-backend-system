@@ -79,7 +79,7 @@ public class WalletFacade {
     }
 
     public AccountListResponse listAccounts(Integer limit, String cursor) {
-        int lim = limit == null ? DEFAULT_LIMIT : Math.min(Math.max(1, limit), MAX_LIMIT);
+        int lim = limit == null ? DEFAULT_LIMIT : Math.clamp(limit, 1, MAX_LIMIT);
         log.info("handler_list_accounts limit={} cursor={}", lim, cursor);
         var page = accounts.findAccountsAfterCursor(cursor, lim);
         List<AccountSummary> summaries =

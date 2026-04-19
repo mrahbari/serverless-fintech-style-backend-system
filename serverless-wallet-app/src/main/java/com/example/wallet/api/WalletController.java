@@ -1,8 +1,8 @@
 package com.example.wallet.api;
 
-import com.example.wallet.api.dto.CreateAccountRequest;
-import com.example.wallet.api.dto.DepositRequest;
-import com.example.wallet.api.dto.TransferRequest;
+import com.example.wallet.dto.CreateAccountRequest;
+import com.example.wallet.dto.DepositRequest;
+import com.example.wallet.dto.TransferRequest;
 import com.example.wallet.domain.TransferResult;
 import com.example.wallet.handler.CreateAccountHandler;
 import com.example.wallet.handler.DepositHandler;

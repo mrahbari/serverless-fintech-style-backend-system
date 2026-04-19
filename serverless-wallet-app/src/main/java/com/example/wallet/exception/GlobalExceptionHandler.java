@@ -1,7 +1,5 @@
-package com.example.wallet.api;
+package com.example.wallet.exception;
 
-import com.example.wallet.exception.AccountNotFoundException;
-import com.example.wallet.exception.InsufficientFundsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Single-table style document: partition key {@code id}, attribute {@code balance}.
- * Maps to a DynamoDB item: PK = ACCOUNT#&lt;id&gt;, balance as Number.
+ * Maps to a DynamoDB item: PK = ACCOUNT<id> balance as Number.
  */
 public final class Account {
 
