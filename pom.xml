@@ -37,7 +37,7 @@
 
     <modules>
         <module>wallet-core</module>
-        <module>serverless-wallet-app</module>
+        <module>serverless-wallet</module>
         <module>wallet-lambda</module>
     </modules>
 </project>
